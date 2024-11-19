@@ -1,6 +1,6 @@
 from redis import asyncio as aioredis
 from typing import List
-from dependencies import redis_url
+from app.dependencies import redis_url
 
 async def run_migrations():
     """Инициализация структуры данных в Redis."""
@@ -13,11 +13,11 @@ async def run_migrations():
 
     # Добавляем предопределенные значения
     initial_items = [
-        {"id": 1, "name": "Item 1", "price": 10.0, "in_stock": True},
-        {"id": 2, "name": "Item 2", "price": 20.0, "in_stock": False}
+        {"id": 1, "name": "Item 1", "price": 10.0},
+        {"id": 2, "name": "Item 2", "price": 20.0}
     ]
     for item in initial_items:
-        redis.hset(f"item:{item['id']}", mapping=item)
+        await redis.hset(f"item:{item['id']}", mapping=item)
 
     print("Миграции выполнены.")
     await redis.close()

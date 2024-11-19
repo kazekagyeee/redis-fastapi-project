@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.routers import items
 from app.dependencies import redis_client
+import app.migrations.initialize_redis as initialize_redis
 
 app = FastAPI()
 
@@ -11,6 +12,7 @@ app.include_router(items.router)
 @app.on_event("startup")
 async def startup_event():
     await redis_client.connect()
+    await initialize_redis.run_migrations()
 
 @app.on_event("shutdown")
 async def shutdown_event():
