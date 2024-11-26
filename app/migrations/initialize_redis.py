@@ -1,6 +1,12 @@
+from faker import Faker
 from redis import asyncio as aioredis
 from typing import List
-from app.dependencies import redis_url
+from app import mapper
+from app.redis_client import redis_url
+
+mapper = mapper.ModelMapper()
+# Создаем экземпляр Faker
+faker = Faker('ru_RU')
 
 async def run_migrations():
     """Инициализация структуры данных в Redis."""
@@ -9,15 +15,34 @@ async def run_migrations():
     # Проверяем существование ключа
     if not await redis.exists("items"):
         # Инициализируем пустую коллекцию
-        await redis.set("items", "[]")  # Или используйте другую структуру
+        await redis.set("items", "[]")
 
-    # Добавляем предопределенные значения
-    initial_items = [
-        {"id": 1, "name": "Item 1", "price": 10.0},
-        {"id": 2, "name": "Item 2", "price": 20.0}
-    ]
-    for item in initial_items:
-        await redis.hset(f"item:{item['id']}", mapping=item)
+    if not await redis.exists("sellers"):
+        await redis.set("sellers", "[]")
+
+    if not await redis.exists("warehouses"):
+        await redis.set("warehouses", "[]")
+
+    for i in range(1, 26):
+        item_data = {
+            "id": i,
+            "name": faker.name(),
+            "price": faker.rd_number(),
+            "in_stock": int(faker.boolean())
+        }
+        seller_data = {
+            "id": i,
+            "name": faker.name()
+        }
+        warehouse_data = {
+            "id": i,
+            "name": faker.name(),
+            "address": faker.address(),
+            "seller_id": i
+        }
+        await redis.hset(f"item:{i}", mapping=item_data)
+        await redis.hset(f"seller:{i}", mapping=seller_data)
+        await redis.hset(f"warehouse:{i}", mapping=warehouse_data)
 
     print("Миграции выполнены.")
     await redis.close()

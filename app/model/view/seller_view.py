@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
-class Seller(BaseModel):
+class SellerView(BaseModel):
     id: int
     name: str

@@ -1,12 +1,14 @@
 from fastapi import FastAPI
-from app.routers import items
-from app.dependencies import redis_client
+from app.routers import items, sellers, warehouses
+from app.redis_client import redis_client
 import app.migrations.initialize_redis as initialize_redis
 
 app = FastAPI()
 
 # Подключаем маршруты
 app.include_router(items.router)
+app.include_router(sellers.router)
+app.include_router(warehouses.router)
 
 # События старта и остановки приложения
 @app.on_event("startup")
